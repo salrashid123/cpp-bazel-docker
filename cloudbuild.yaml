@@ -1,0 +1,17 @@
+steps:
+- name: gcr.io/cloud-builders/bazel@sha256:619011433077e5383291a55b362616f296ac36f3c9be4676bab8948955929bb3
+  id: build
+  args: ['run', '--repo_env=BAZEL_CXXOPTS=-std=c++14', ':cc_image']
+
+- name: gcr.io/cloud-builders/docker
+  id: tag
+  args: ['tag', 'us-central1-docker.pkg.dev/builder-project/r1/ccimage:cc_image', 'us-central1-docker.pkg.dev/$PROJECT_ID/r1/ccimage:cc_image']
+  waitFor: ['build']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: push
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/r1/ccimage:cc_image']
+  waitFor: ['tag']
+
+options:
+  machineType: 'N1_HIGHCPU_32'
